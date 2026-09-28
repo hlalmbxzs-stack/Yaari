@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>यारी</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700&family=Hind:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#1b1530;--card:#2a2250;--ink:#f6f1ff;--mute:#a49bc8;--gold:#ffb627;--red:#ff4d5e;box-sizing:border-box}
+*{box-sizing:inherit;margin:0}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font:400 16px/1.5 Hind,"Noto Sans Devanagari",system-ui,sans-serif}
+h1,h2,button,.tab{font-family:"Baloo 2",Hind,system-ui,sans-serif}
+button{cursor:pointer;border:0;border-radius:12px;padding:8px 14px;background:var(--gold);color:#2a1d00;font-size:15px;font-weight:700}
+button.alt{background:#3b3266;color:var(--ink)}
+button.red{background:var(--red);color:#fff}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+input,select{width:100%;padding:10px 12px;border-radius:12px;border:1px solid #4a3f7d;background:var(--card);color:var(--ink);font:inherit}
+.mute{color:var(--mute)}
+#login{height:100%;display:grid;place-content:center;gap:14px;text-align:center;padding:24px}
+#login h1{font-size:64px;color:var(--gold);line-height:1}
+#app{height:100%;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top)}
+header{padding:10px 16px}
+header h1{font-size:28px;color:var(--gold)}
+main{flex:1;min-height:0;position:relative}
+.pane{position:absolute;inset:0;display:none;flex-direction:column;padding:8px 16px;gap:10px;overflow:auto}
+.pane.on{display:flex}
+.row{display:flex;gap:8px}
+.card{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:16px;padding:10px}
+.card .inf{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.3}
+.card .inf span{color:var(--mute);font-size:14px}
+.av{width:48px;height:48px;border-radius:50%;background:#3b3266;display:grid;place-items:center;font-size:28px;flex:none}
+.av.big{width:120px;height:120px;font-size:64px}
+#avs{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+#avs button{background:var(--card);font-size:26px;padding:6px}
+#avs button.on{outline:3px solid var(--gold)}
+label.ck{display:flex;gap:8px;align-items:center}
+label.ck input{width:20px;height:20px}
+#msgs{flex:1;overflow:auto;display:flex;flex-direction:column;gap:6px;min-height:0}
+.b{max-width:80%;background:var(--card);padding:6px 12px;border-radius:14px 14px 14px 4px;overflow-wrap:anywhere}
+.b b{display:block;font-size:13px;color:var(--gold)}
+.b.me{align-self:flex-end;background:var(--gold);color:#2a1d00;border-radius:14px 14px 4px 14px}
+nav{display:flex;background:var(--card);padding-bottom:env(safe-area-inset-bottom)}
+.tab{flex:1;background:none;color:var(--mute);border-radius:0;padding:14px 4px}
+.tab.on{color:var(--gold);box-shadow:inset 0 3px var(--gold)}
+#cs{position:fixed;inset:0;background:#000;z-index:5}
+#rv{width:100%;height:100%;object-fit:cover}
+#lv{position:absolute;right:12px;top:calc(12px + env(safe-area-inset-top));width:28%;border-radius:12px;border:2px solid var(--bg)}
+#ca{position:absolute;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+.bar{position:absolute;left:0;right:0;bottom:0;display:flex;gap:10px;justify-content:center;padding:16px 16px calc(16px + env(safe-area-inset-bottom));z-index:2}
+#in{position:fixed;inset:0;background:#000a;z-index:6;display:grid;place-content:center;padding:24px}
+#in>div{background:var(--card);border-radius:20px;padding:24px;text-align:center;display:flex;flex-direction:column;gap:14px}
+#toast{position:fixed;left:16px;right:16px;bottom:88px;background:var(--red);color:#fff;padding:10px 14px;border-radius:12px;z-index:9}
+</style>
+</head>
+<body>
+
+<section id="login">
+  <h1>यारी</h1>
+  <p>नए दोस्त बनाओ, बात करो, वीडियो कॉल करो।</p>
+  <button id="gbtn" style="padding:12px 18px;font-size:17px">Google से लॉगिन करो</button>
+</section>
+
+<div id="app" hidden>
+  <header><h1>यारी</h1></header>
+  <main>
+    <section class="pane on" id="p-home">
+      <h2>ऑनलाइन दोस्त</h2>
+      <div id="ol" style="display:flex;flex-direction:column;gap:8px"></div>
+    </section>
+
+    <section class="pane" id="p-chat">
+      <div class="row"><input id="room" placeholder="रूम का नाम (जैसे dost)" aria-label="रूम का नाम"><button id="joinb">जुड़ो</button></div>
+      <div id="msgs"></div>
+      <form class="row" id="sf"><input id="tx" placeholder="मैसेज लिखो" autocomplete="off" aria-label="मैसेज"><button>भेजो</button></form>
+    </section>
+
+    <section class="pane" id="p-me">
+      <h2>मेरा प्रोफाइल</h2>
+      <div id="avs"></div>
+      <input id="nm" placeholder="तुम्हारा नाम" maxlength="20" aria-label="नाम">
+      <input id="st" placeholder="राज्य (जैसे Madhya Pradesh)" maxlength="30" aria-label="राज्य">
+      <select id="lg" aria-label="भाषा"><option>हिन्दी</option><option>English</option><option>मराठी</option><option>বাংলা</option><option>ଓଡ଼ିଆ</option></select>
+      <label class="ck"><input type="checkbox" id="ad"> मेरी उम्र 18 साल या ज़्यादा है</label>
+      <button id="save">प्रोफाइल सेव करो</button>
+      <button class="alt" id="out">बाहर निकलो</button>
+    </section>
+  </main>
+  <nav>
+    <button class="tab on" data-t="home">होम</button>
+    <button class="tab" data-t="chat">चैट</button>
+    <button class="tab" data-t="me">प्रोफाइल</button>
+  </nav>
+</div>
+
+<div id="cs" hidden>
+  <video id="rv" autoplay playsinline></video>
+  <video id="lv" autoplay playsinline muted></video>
+  <div id="ca"><div class="av big" id="cav"></div><h2 id="cnm"></h2><p class="mute">वॉइस कॉल चल रही है</p></div>
+  <div class="bar"><button class="red" id="end">कॉल खत्म करो</button><button class="alt" id="blk">ब्लॉक</button><button class="alt" id="rep">रिपोर्ट</button></div>
+</div>
+
+<div id="in" hidden><div><h2 id="inn"></h2><div class="row"><button class="red" id="dec" style="flex:1">काटो</button><button id="acc" style="flex:1">उठाओ</button></div></div></div>
+<div id="toast" hidden></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+const cfg = {
+  apiKey: "AIzaSyCMsgISlvV2Qf3uJtviOb3jOTKSkXSRuk8",
+  authDomain: "yaari-884fc.firebaseapp.com",
+  projectId: "yaari-884fc",
+  appId: "1:33253260481:web:1c484f7d3e123f37b26840"
+};
+const $ = s => document.querySelector(s);
+const AV = ['😎','🧑‍🎤','👩‍🎤','🦸','🧙','🥷','👸','🤴','🧑‍🚀','🐯','🦊','🐼'];
+const TS = () => firebase.firestore.FieldValue.serverTimestamp();
+let user, db, prof, peer, pid, local, cur, cm, ring, room = 'dost', unsubC, unsubU, hb, docs = [], sel = 0;
+
+function toast(t){const e=$('#toast');e.textContent=t;e.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>e.hidden=true,3500)}
+function el(t,c,x){const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
+function go(t){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+  document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id==='p-'+t));
+}
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{
+  if(!prof&&b.dataset.t!=='me'){toast('पहले अपना प्रोफाइल बनाओ');return go('me')}
+  go(b.dataset.t);
+});
+
+/* ---------- लॉगिन ---------- */
+firebase.initializeApp(cfg);
+db = firebase.firestore();
+$('#gbtn').onclick = () => firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>toast(e.message));
+$('#out').onclick = () => firebase.auth().signOut().then(()=>location.reload());
+firebase.auth().onAuthStateChanged(async u=>{
+  user=u; $('#login').hidden=!!u; $('#app').hidden=!u;
+  if(!u) return;
+  try{const d=await db.collection('users').doc(u.uid).get();prof=d.exists&&d.data().name?d.data():null}catch(e){toast('प्रोफाइल नहीं खुला: '+e.code)}
+  initPeer(); buildAv(); fillForm(); join('dost');
+  if(prof){go('home');start()}else{go('me');toast('पहले अपना प्रोफाइल बनाओ')}
+});
+
+/* ---------- प्रोफाइल ---------- */
+function buildAv(){
+  const box=$('#avs');box.textContent='';
+  AV.forEach((a,i)=>{const b=el('button',i===sel?'on':'',a);b.onclick=()=>{sel=i;buildAv()};box.append(b)});
+}
+function fillForm(){
+  if(!prof)return;
+  sel=prof.av||0;$('#nm').value=prof.name||'';$('#st').value=prof.state||'';$('#lg').value=prof.lang||'हिन्दी';$('#ad').checked=!!prof.adult;buildAv();
+}
+$('#save').onclick=async()=>{
+  const name=$('#nm').value.trim();
+  if(!name)return toast('नाम लिखो');
+  if(!$('#ad').checked)return toast('18+ पर टिक करना ज़रूरी है');
+  const d={name,av:sel,state:$('#st').value.trim(),lang:$('#lg').value,adult:true};
+  try{
+    await db.collection('users').doc(user.uid).set(d,{merge:true});
+    prof={...(prof||{}),...d};start();go('home');toast('प्रोफाइल सेव हो गया');
+  }catch(e){toast('सेव नहीं हुआ: '+e.code)}
+};
+
+/* ---------- ऑनलाइन लिस्ट ---------- */
+function beat(){
+  if(!prof||!pid||document.visibilityState!=='visible')return;
+  db.collection('users').doc(user.uid).set({peer:pid,seen:TS()},{merge:true}).catch(()=>{});
+}
+function start(){
+  beat();
+  if(!hb)hb=setInterval(()=>{beat();render()},60000);
+  unsubU&&unsubU();
+  unsubU=db.collection('users').where('seen','>',new Date(Date.now()-600000)).limit(40)
+    .onSnapshot(s=>{docs=s.docs.map(d=>({id:d.id,u:d.data()}));render()},e=>toast('लिस्ट नहीं खुली: '+e.code));
+}
+function render(){
+  const box=$('#ol');box.textContent='';
+  const bl=(prof&&prof.blocked)||[],now=Date.now();let n=0;
+  docs.forEach(({id,u})=>{
+    const t=u.seen&&u.seen.toMillis?u.seen.toMillis():now;
+    if(id===user.uid||bl.includes(id)||!u.name||!u.peer||now-t>150000)return;
+    n++;
+    const c=el('div','card'),i=el('div','inf');
+    i.append(el('b','',u.name),el('span','',[u.state,u.lang].filter(Boolean).join(' · ')));
+    const b1=el('button','alt','वॉइस'),b2=el('button','','वीडियो');
+    b1.onclick=()=>dial(id,u,false);b2.onclick=()=>dial(id,u,true);
+    c.append(el('div','av',AV[u.av]||'🙂'),i,b1,b2);box.append(c);
+  });
+  if(!n)box.append(el('p','mute','अभी कोई और ऑनलाइन नहीं है। इस लिंक को दोस्तों को भेजो, वे प्रोफाइल बनाकर आएँगे।'));
+}
+
+/* ---------- कॉल ---------- */
+function initPeer(){
+  if(peer)return;
+  peer=new Peer('y'+Math.random().toString(36).slice(2,8));
+  peer.on('open',id=>{pid=id;beat()});
+  peer.on('error',e=>toast('कनेक्शन में दिक्कत: '+e.type));
+  peer.on('call',c=>{
+    const m=c.metadata||{};
+    if(!prof||cur||ring||((prof.blocked||[]).includes(m.uid))){c.close();return}
+    ring=c;
+    $('#inn').textContent=(AV[m.av]||'🙂')+' '+(m.name||'कोई')+' '+(m.v?'वीडियो':'वॉइस')+' कॉल कर रहा है';
+    $('#in').hidden=false;
+    c.on('close',()=>{if(ring===c){ring=null;$('#in').hidden=true}});
+  });
+}
+async function cam(v){
+  local&&local.getTracks().forEach(t=>t.stop());
+  local=await navigator.mediaDevices.getUserMedia({audio:true,video:v?{facingMode:'user'}:false});
+}
+async function dial(id,u,v){
+  if(cur)return;
+  try{
+    await cam(v);
+    const c=peer.call(u.peer,local,{metadata:{name:prof.name,av:prof.av,uid:user.uid,v}});
+    startCall(c,{name:u.name,av:u.av,uid:id,v});
+  }catch(e){toast('माइक/कैमरा की अनुमति दो')}
+}
+$('#acc').onclick=async()=>{
+  const c=ring,m=c.metadata||{};ring=null;$('#in').hidden=true;
+  try{await cam(m.v);c.answer(local);startCall(c,m)}catch(e){c.close();toast('माइक/कैमरा की अनुमति दो')}
+};
+$('#dec').onclick=()=>{ring&&ring.close();ring=null;$('#in').hidden=true};
+function startCall(c,m){
+  cur=c;cm=m;$('#cs').hidden=false;
+  $('#lv').srcObject=local;$('#lv').hidden=!m.v;
+  $('#ca').hidden=!!m.v;$('#cav').textContent=AV[m.av]||'🙂';$('#cnm').textContent=m.name||'';
+  c.on('stream',s=>{$('#rv').srcObject=s});
+  c.on('close',endCall);
+}
+function endCall(){
+  const c=cur;cur=null;c&&c.close();
+  local&&local.getTracks().forEach(t=>t.stop());local=null;
+  $('#rv').srcObject=null;$('#lv').srcObject=null;$('#cs').hidden=true;
+}
+$('#end').onclick=endCall;
+$('#blk').onclick=async()=>{
+  if(!cm||!cm.uid)return;
+  try{
+    await db.collection('users').doc(user.uid).update({blocked:firebase.firestore.FieldValue.arrayUnion(cm.uid)});
+    prof.blocked=[...(prof.blocked||[]),cm.uid];endCall();render();toast('ब्लॉक कर दिया');
+  }catch(e){toast('ब्लॉक नहीं हुआ: '+e.code)}
+};
+$('#rep').onclick=async()=>{
+  if(!cm||!cm.uid)return;
+  try{await db.collection('reports').add({from:user.uid,about:cm.uid,t:TS()});toast('रिपोर्ट भेज दी गई')}
+  catch(e){toast('रिपोर्ट नहीं गई: '+e.code)}
+};
+
+/* ---------- चैट ---------- */
+function join(r){
+  room=(r||'dost').trim().toLowerCase()||'dost';$('#room').value=room;
+  unsubC&&unsubC();
+  const box=$('#msgs');box.textContent='';
+  unsubC=db.collection('rooms').doc(room).collection('m').orderBy('t').limitToLast(100).onSnapshot(s=>{
+    box.textContent='';
+    s.forEach(d=>{
+      const m=d.data(),e=el('div','b'+(m.u===user.uid?' me':''));
+      if(m.u!==user.uid)e.append(el('b','',m.n));
+      e.append(m.x);box.append(e);
+    });
+    box.scrollTop=box.scrollHeight;
+  },e=>toast('चैट नहीं खुली: '+e.code));
+}
+$('#joinb').onclick=()=>join($('#room').value);
+$('#sf').onsubmit=e=>{
+  e.preventDefault();
+  const x=$('#tx').value.trim();if(!x)return;$('#tx').value='';
+  db.collection('rooms').doc(room).collection('m').add({x,u:user.uid,n:(prof&&prof.name)||user.displayName||'दोस्त',t:TS()})
+    .catch(e=>toast('मैसेज नहीं गया: '+e.code));
+};
+</script>
+</body>
+</html>
